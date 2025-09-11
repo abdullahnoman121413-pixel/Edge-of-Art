@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge Of Art</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts for Logo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #0d1117; /* Dark background */
+            overflow-y: scroll; /* Prevent layout shift */
+        }
+        .text-glow-blue {
+            text-shadow: 0 0 8px theme(colors.cyan.400 / 0.8);
+        }
+        .text-glow-pink {
+            text-shadow: 0 0 8px theme(colors.pink.500 / 0.8);
+        }
+        .header-title-font {
+            font-family: 'Cormorant Garamond', serif;
+            letter-spacing: 1px;
+        }
+        /* Cart Shake Animation */
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+        .shake {
+            animation: shake 0.7s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        /* For video aspect ratio */
+        .aspect-w-16 { position: relative; padding-bottom: 56.25%; }
+        .aspect-h-9 { height: 0; }
+        .aspect-w-16 > * { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        /* For scrollbar styling in search results */
+        #search-results-container::-webkit-scrollbar {
+            width: 5px;
+        }
+        #search-results-container::-webkit-scrollbar-track {
+            background: #161b22;
+        }
+        #search-results-container::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 10px;
+        }
+
+        /* Page content animation */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .page-animation {
+            animation: slideInUp 0.5s ease-out forwards;
+        }
+
+        /* Search bar animation */
+        #search-bar-container {
+            transition: all 0.4s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-20px);
+            overflow: hidden;
+            margin-bottom: 0 !important;
+        }
+        #search-bar-container.active {
+            max-height: 100px; 
+            opacity: 1;
+            transform: translateY(0);
+            margin-bottom: 1rem !important;
+        }
+    </style>
+</head>
+<body class="bg-[#0d1117] text-gray-200">
+
+    <!-- Main container to simulate a mobile screen -->
+    <div class="max-w-sm mx-auto bg-[#0d1117] min-h-screen shadow-2xl relative pb-20">
+
+        <!-- Header Section -->
+        <header class="sticky top-0 bg-[#161b22]/80 backdrop-blur-sm z-20 border-b border-cyan-500/20">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <button id="back-btn" class="hidden text-cyan-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <h1 id="header-title" class="text-2xl font-bold text-cyan-400 cursor-pointer text-glow-blue header-title-font">Edge of Art</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                     <button id="search-icon-btn" class="text-gray-400 hover:text-cyan-400 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                    <div id="cart-icon-container" class="relative cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-4">
+            
+            <!-- Search Bar -->
+            <div id="search-bar-container" class="relative">
+                <input type="text" id="search-input" placeholder="Search here..." class="w-full py-2 pl-10 pr-4 bg-transparent border border-gray-700 rounded-full focus:outline-none text-white placeholder-gray-500">
+                <div class="absolute top-0 left-0 inline-flex items-center justify-center h-full w-10 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <!-- Search Results Dropdown -->
+                <div id="search-results-container" class="absolute top-full left-0 right-0 bg-[#1e242c] border border-gray-700 rounded-b-lg mt-1 z-10 hidden max-h-60 overflow-y-auto">
+                    <!-- Search results will be injected here -->
+                </div>
+            </div>
+
+            <!-- Banner Slider -->
+            <div id="banner-slider-container" class="relative w-full h-40 mx-auto overflow-hidden rounded-lg mb-6">
+                <div id="banner-slider" class="flex transition-transform duration-500 ease-in-out h-full">
+                    <!-- Banners will be injected here by JavaScript -->
+                </div>
+                <div id="slider-dots" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+                    <!-- Dots will be injected here -->
+                </div>
+            </div>
+
+            <!-- Products Section (Home Page & Filtered Views) -->
+            <section id="product-section">
+                <h3 id="product-section-title" class="text-lg font-semibold text-gray-200 mb-3 border-l-4 border-cyan-400 pl-3">Popular Products</h3>
+                <div id="product-list" class="grid grid-cols-2 gap-4">
+                    <!-- Product items will be injected here by JavaScript -->
+                </div>
+            </section>
+            
+            <!-- Category Banners Display Section (Category Page) -->
+            <section id="category-display-section" class="hidden">
+                 <h3 class="text-lg font-semibold text-gray-200 mb-3 border-l-4 border-pink-500 pl-3">All Categories</h3>
+                 <div id="category-banner-list" class="space-y-4">
+                    <!-- Category banners will be injected here by JavaScript -->
+                 </div>
+            </section>
+
+            <!-- Offers Section (Offer Page) -->
+            <section id="offer-section" class="hidden">
+                 <h3 class="text-lg font-semibold text-gray-200 mb-3 border-l-4 border-cyan-400 pl-3">All Offers</h3>
+                 <div id="offer-banner-list" class="space-y-4">
+                    <!-- Offer banners will be injected here by JavaScript -->
+                 </div>
+            </section>
+            
+            <!-- About Us Section -->
+            <section id="about-us-section" class="hidden">
+                 <h3 class="text-lg font-semibold text-gray-200 mb-3 border-l-4 border-pink-500 pl-3">About Us</h3>
+                 <div id="about-us-content" class="bg-[#161b22] p-4 rounded-lg space-y-6 text-gray-400 text-sm">
+                    <!-- About Us content will be injected here -->
+                 </div>
+            </section>
+
+            <!-- Cart Section -->
+            <section id="cart-section" class="hidden">
+                <div id="cart-item-list" class="space-y-4">
+                    <!-- Cart items will be injected here -->
+                </div>
+                <div id="cart-summary" class="mt-6">
+                    <!-- Cart summary will be injected here -->
+                </div>
+            </section>
+            
+            <!-- Product Detail Section -->
+            <section id="product-detail-section" class="hidden">
+                <!-- Image Gallery -->
+                <div id="product-image-gallery" class="mb-4">
+                    <img id="main-product-image" src="" alt="Product Image" class="w-full h-64 object-cover rounded-lg mb-2 border border-gray-700">
+                    <div id="thumbnail-container" class="flex space-x-2 overflow-x-auto pb-2">
+                        <!-- Thumbnails go here -->
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div id="product-info" class="mb-4">
+                    <p id="product-detail-id" class="text-xs text-gray-500 mb-1"></p>
+                    <h2 id="product-detail-name" class="text-2xl font-bold text-cyan-400 mb-2"></h2>
+                    
+                    <!-- Size Options -->
+                    <div id="size-options-section" class="mb-4">
+                        <h4 class="text-sm font-semibold text-gray-400 mb-2">Select Size:</h4>
+                        <div id="size-options-container" class="flex flex-wrap gap-2">
+                            <!-- Size buttons will be injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Color Options -->
+                    <div id="color-options-section" class="mb-4">
+                        <h4 class="text-sm font-semibold text-gray-400 mb-2">Select Color:</h4>
+                        <div id="color-options-container" class="flex flex-wrap gap-2">
+                            <!-- Color buttons will be injected here -->
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <p id="product-detail-price" class="text-3xl font-bold text-cyan-400 text-glow-blue"></p>
+                        <a href="#" id="whatsapp-link" target="_blank" class="bg-green-500 text-white px-3 py-2 text-sm font-bold rounded-md hover:bg-green-600 transition-colors">
+                            Order on WhatsApp
+                        </a>
+                    </div>
+                    <button id="detail-add-to-cart-btn" data-product-id="" class="w-full bg-cyan-500 text-black py-2.5 rounded-lg font-bold hover:bg-cyan-400 hover:shadow-[0_0_20px_theme(colors.cyan.500/0.5)] transition-all">Add to Cart</button>
+                </div>
+
+                <!-- Product Video -->
+                <div id="product-video-container" class="mb-4">
+                    <h3 class="text-lg font-semibold text-gray-200 mb-2 border-l-4 border-pink-500 pl-3">Product Video</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <iframe id="product-video-iframe" class="w-full h-full rounded-lg" src="" title="Product Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div id="product-description-container" class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-200 mb-2 border-l-4 border-pink-500 pl-3">Description</h3>
+                    <p id="product-detail-description" class="text-gray-400 text-sm leading-relaxed"></p>
+                </div>
+
+                <!-- Similar Products -->
+                <div id="similar-products-container">
+                    <h3 class="text-lg font-semibold text-gray-200 mb-3 border-l-4 border-cyan-400 pl-3">Similar Products</h3>
+                    <div id="similar-product-list" class="grid grid-cols-2 gap-4">
+                        <!-- Similar products will be injected here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Checkout Section -->
+            <section id="checkout-section" class="hidden">
+                <h3 class="text-xl font-semibold text-gray-200 mb-4 border-l-4 border-pink-500 pl-3">Order Form</h3>
+                <form id="checkout-form" class="space-y-4">
+                    <!-- Customer Details -->
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-400">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required class="mt-1 block w-full bg-[#161b22] border border-gray-700 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label for="mobileNumber" class="block text-sm font-medium text-gray-400">Mobile Number</label>
+                        <input type="tel" id="mobileNumber" name="mobileNumber" required class="mt-1 block w-full bg-[#161b22] border border-gray-700 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label for="fullAddress" class="block text-sm font-medium text-gray-400">Full Address</label>
+                        <textarea id="fullAddress" name="fullAddress" rows="3" required class="mt-1 block w-full bg-[#161b22] border border-gray-700 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"></textarea>
+                    </div>
+                    <div>
+                        <label for="comments" class="block text-sm font-medium text-gray-400">Comments (Optional)</label>
+                        <textarea id="comments" name="comments" rows="2" class="mt-1 block w-full bg-[#161b22] border border-gray-700 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"></textarea>
+                    </div>
+
+                    <!-- Delivery Options -->
+                    <fieldset>
+                        <legend class="text-sm font-medium text-gray-400">Delivery Type</legend>
+                        <div id="delivery-options-container" class="mt-2 space-y-2">
+                            <!-- Delivery options will be injected here -->
+                        </div>
+                    </fieldset>
+
+                    <!-- Payment Options -->
+                    <fieldset>
+                        <legend class="text-sm font-medium text-gray-400">Payment Option</legend>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex items-center">
+                                <input id="paymentCod" name="paymentMethod" type="radio" value="cod" required class="focus:ring-cyan-500 h-4 w-4 text-cyan-600 border-gray-600">
+                                <label for="paymentCod" class="ml-3 block text-sm font-medium text-gray-300">Cash on Delivery</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="paymentBkash" name="paymentMethod" type="radio" value="bkash" required class="focus:ring-cyan-500 h-4 w-4 text-cyan-600 border-gray-600">
+                                <label for="paymentBkash" class="ml-3 block text-sm font-medium text-gray-300">bKash</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                     <!-- Order Summary -->
+                    <div id="order-summary" class="bg-[#161b22] p-4 rounded-lg border-t border-cyan-500/20 space-y-2">
+                        <!-- Summary details will be injected here -->
+                    </div>
+
+                    <!-- bKash Details -->
+                    <div id="bkash-payment-details" class="hidden space-y-4 bg-[#161b22] p-4 rounded-md border border-pink-500/50">
+                         <p id="bkash-number-display" class="text-sm text-center text-gray-300"></p>
+                         <div>
+                            <label for="transactionId" class="block text-sm font-medium text-gray-400">Transaction ID</label>
+                            <input type="text" id="transactionId" name="transactionId" class="mt-1 block w-full bg-[#0d1117] border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+                        </div>
+                        <div>
+                            <label for="senderNumber" class="block text-sm font-medium text-gray-400">Your bKash Number</label>
+                            <input type="tel" id="senderNumber" name="senderNumber" class="mt-1 block w-full bg-[#0d1117] border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full bg-cyan-500 text-black py-2.5 rounded-lg font-bold hover:bg-cyan-400 hover:shadow-[0_0_20px_theme(colors.cyan.500/0.5)] transition-all">Submit Order</button>
+                </form>
+            </section>
+            
+            <!-- Order Success Section -->
+            <section id="order-success-section" class="hidden text-center">
+                <div class="bg-[#161b22] p-8 rounded-lg">
+                    <svg class="w-16 h-16 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <h3 class="text-2xl font-bold text-cyan-400 mb-2">Order Placed!</h3>
+                    <p class="text-gray-400 mb-6">Thank you for your purchase. We will contact you shortly.</p>
+                    <button id="back-to-home-btn" class="bg-cyan-500 text-black py-2 px-6 rounded-lg font-bold hover:bg-cyan-400">Back to Home</button>
+                </div>
+            </section>
+
+
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-sm mx-auto bg-[#161b22]/80 backdrop-blur-sm border-t border-cyan-500/20 flex justify-around py-2 z-10">
+            <a href="#" id="home-btn" class="flex flex-col items-center text-gray-400 w-1/4 hover:text-cyan-400 transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="text-xs font-medium">Home</span>
+            </a>
+            <a href="#" id="category-btn-nav" class="flex flex-col items-center text-gray-400 w-1/4 hover:text-cyan-400 transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                <span class="text-xs">Category</span>
+            </a>
+            <a href="#" id="offer-btn-nav" class="flex flex-col items-center text-gray-400 w-1/4 hover:text-cyan-400 transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                <span class="text-xs">Offers</span>
+            </a>
+            <a href="#" id="about-us-btn" class="flex flex-col items-center text-gray-400 w-1/4 hover:text-cyan-400 transition-all duration-300">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-xs">About Us</span>
+            </a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyAwQISlJDRKyqKArS5Q58C85velptSY_nI",
+          authDomain: "edge-of-art.firebaseapp.com",
+          projectId: "edge-of-art",
+          storageBucket: "edge-of-art.appspot.com",
+          messagingSenderId: "262767242475",
+          appId: "1:262767242475:web:bfbc87de8caac156a4a2ae"
+        };
+        const appId = firebaseConfig.projectId;
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        async function main() {
+            try {
+                await signInAnonymously(auth);
+                initializeAppLogic();
+            } catch (error) {
+                console.error("Anonymous sign-in failed:", error);
+            }
+        }
+        main();
+
+        function initializeAppLogic() {
+            // --- DOM Elements ---
+            const mainContent = document.querySelector('main');
+            const searchBarContainer = document.getElementById('search-bar-container');
+            const searchInput = document.getElementById('search-input');
+            const searchResultsContainer = document.getElementById('search-results-container');
+            const productList = document.getElementById('product-list');
+            const cartCountElement = document.getElementById('cart-count');
+            const cartIconContainer = document.getElementById('cart-icon-container');
+            const backBtn = document.getElementById('back-btn');
+            
+            // Slider Elements
+            const bannerSliderContainer = document.getElementById('banner-slider-container');
+            const bannerSlider = document.getElementById('banner-slider');
+            const sliderDots = document.getElementById('slider-dots');
+
+            // Page Sections
+            const allSections = document.querySelectorAll('main > section');
+            const productSection = document.getElementById('product-section');
+            const categoryDisplaySection = document.getElementById('category-display-section');
+            
+            // Section Content
+            const productSectionTitle = document.getElementById('product-section-title');
+            const categoryBannerList = document.getElementById('category-banner-list');
+            const offerBannerList = document.getElementById('offer-banner-list');
+            const cartItemList = document.getElementById('cart-item-list');
+            const cartSummary = document.getElementById('cart-summary');
+            const checkoutForm = document.getElementById('checkout-form');
+            const aboutUsContent = document.getElementById('about-us-content');
+
+            // Product Detail Elements
+            const mainProductImage = document.getElementById('main-product-image');
+            const thumbnailContainer = document.getElementById('thumbnail-container');
+            const productDetailId = document.getElementById('product-detail-id');
+            const productDetailName = document.getElementById('product-detail-name');
+            const productDetailPrice = document.getElementById('product-detail-price');
+            const whatsappLink = document.getElementById('whatsapp-link');
+            const detailAddToCartBtn = document.getElementById('detail-add-to-cart-btn');
+            const productVideoIframe = document.getElementById('product-video-iframe');
+            const productDetailDescription = document.getElementById('product-detail-description');
+            const similarProductList = document.getElementById('similar-product-list');
+            const sizeOptionsContainer = document.getElementById('size-options-container');
+            const sizeOptionsSection = document.getElementById('size-options-section');
+            const colorOptionsContainer = document.getElementById('color-options-container');
+            const colorOptionsSection = document.getElementById('color-options-section');
+
+            // Navigation Buttons
+            const navButtons = document.querySelectorAll('nav a');
+            
+            // --- State ---
+            let allProducts = [];
+            let allCategories = [];
+            let allOffers = [];
+            let cartItems = [];
+            let currentSelectedSize = null;
+            let currentSelectedColor = null;
+            let cartTotal = 0;
+            let deliveryCharges = { inside: 60, outside: 120 };
+            
+            // --- Firestore References ---
+            const productsRef = collection(db, `artifacts/${appId}/public/data/products`);
+            const categoriesRef = collection(db, `artifacts/${appId}/public/data/categories`);
+            const offersRef = collection(db, `artifacts/${appId}/public/data/offers`);
+            const settingsRef = doc(db, `artifacts/${appId}/public/data/settings`, "config");
+            const aboutUsRef = doc(db, `artifacts/${appId}/public/data/aboutUs`, "content");
+            const bannersRef = collection(db, `artifacts/${appId}/public/data/banners`);
+
+            // --- Functions ---
+            const navigate = (pageName, data = null, push = true) => {
+                if (push) {
+                    const state = { page: pageName, data: data };
+                    const url = `#${pageName}${data ? `/${data.value || data}` : ''}`;
+                    history.pushState(state, '', url);
+                }
+                renderPage(pageName, data);
+            };
+
+            const renderPage = (pageName, data = null) => {
+                allSections.forEach(s => {
+                    s.classList.add('hidden');
+                    s.classList.remove('page-animation');
+                });
+
+                const targetSection = document.getElementById(`${pageName}-section`);
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                    requestAnimationFrame(() => targetSection.classList.add('page-animation'));
+                }
+                
+                bannerSliderContainer.classList.toggle('hidden', pageName !== 'product' || (data && data.type));
+                searchBarContainer.classList.remove('active');
+                
+                backBtn.classList.toggle('hidden', (pageName === 'product' && !data) || ['category-display', 'offer', 'about-us'].includes(pageName));
+                
+                if (pageName === 'product' && data) {
+                     productSection.classList.remove('hidden');
+                     if (data.type === 'category') {
+                        productSectionTitle.textContent = `${data.value} Products`;
+                        const filteredProducts = allProducts.filter(p => p.category === data.value);
+                        renderProducts(filteredProducts, productList);
+                    } else if (data.type === 'offer') {
+                        const offerData = allOffers.find(o => o.key === data.value);
+                        productSectionTitle.textContent = `${offerData.description || offerData.key} Products`;
+                        const filteredProducts = allProducts.filter(p => p.offer === data.value);
+                        renderProducts(filteredProducts, productList);
+                    }
+                } else if (pageName === 'product') {
+                     productSectionTitle.textContent = 'Popular Products';
+                     renderProducts(allProducts, productList);
+                }
+
+
+                if (pageName === 'product-detail' && data) {
+                    renderProductDetailContent(data);
+                } else if (pageName === 'checkout') {
+                    renderCheckoutPage();
+                }
+            };
+            
+            function renderProducts(productsToRender, container) {
+                container.innerHTML = '';
+                if (productsToRender.length === 0) {
+                    container.innerHTML = `<p class="col-span-2 text-center text-gray-500">No products found.</p>`;
+                    return;
+                }
+                productsToRender.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'bg-[#161b22] border border-gray-800 rounded-xl overflow-hidden group transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_0_20px_theme(colors.cyan.500/0.2)] cursor-pointer';
+                    productCard.dataset.productId = product.id;
+                    productCard.innerHTML = `
+                        <img src="${product.images && product.images.length > 0 ? product.images[0] : 'https://placehold.co/400x400/161b22/38bdf8?text=No+Image'}" alt="${product.name}" class="w-full h-40 object-cover">
+                        <div class="p-3">
+                            <h4 class="font-semibold text-sm text-gray-200 truncate group-hover:text-cyan-400 transition-colors">${product.name}</h4>
+                        </div>`;
+                    container.appendChild(productCard);
+                });
+            }
+
+            function renderProductDetailContent(productId) {
+                const product = allProducts.find(p => p.id === productId);
+                if (!product) return;
+                
+                mainProductImage.src = product.images && product.images.length > 0 ? product.images[0] : 'https://placehold.co/400x400/161b22/38bdf8?text=No+Image';
+                thumbnailContainer.innerHTML = '';
+                 if (product.images && product.images.length > 0) {
+                    product.images.forEach((imgSrc, index) => {
+                        const thumb = document.createElement('img');
+                        thumb.src = imgSrc;
+                        thumb.alt = `${product.name} thumbnail ${index + 1}`;
+                        thumb.className = `w-16 h-16 object-cover rounded-md cursor-pointer border-2 ${index === 0 ? 'border-cyan-400' : 'border-transparent'} hover:border-cyan-400`;
+                        thumb.addEventListener('click', () => {
+                            mainProductImage.src = imgSrc;
+                            document.querySelectorAll('#thumbnail-container img').forEach(i => i.classList.remove('border-cyan-400'));
+                            thumb.classList.add('border-cyan-400');
+                        });
+                        thumbnailContainer.appendChild(thumb);
+                    });
+                }
+                
+                sizeOptionsContainer.innerHTML = '';
+                if (product.sizes && product.sizes.length > 0) {
+                    sizeOptionsSection.classList.remove('hidden');
+                    product.sizes.forEach((sizeInfo, index) => {
+                        const sizeButton = document.createElement('button');
+                        sizeButton.className = 'size-btn text-sm px-3 py-1 border rounded-md transition-colors';
+                        sizeButton.textContent = sizeInfo.size;
+                        sizeButton.dataset.price = sizeInfo.price;
+                        sizeButton.dataset.size = sizeInfo.size;
+
+                        if (index === 0) {
+                            sizeButton.classList.add('bg-cyan-500', 'border-cyan-500', 'text-black');
+                            productDetailPrice.textContent = `৳${sizeInfo.price.toLocaleString('bn-BD')}`;
+                            currentSelectedSize = sizeInfo;
+                        } else {
+                            sizeButton.classList.add('border-gray-600', 'text-gray-300', 'hover:bg-gray-700');
+                        }
+                        sizeOptionsContainer.appendChild(sizeButton);
+                    });
+                } else {
+                    sizeOptionsSection.classList.add('hidden');
+                }
+
+                colorOptionsContainer.innerHTML = '';
+                 if (product.colors && product.colors.length > 0) {
+                    colorOptionsSection.classList.remove('hidden');
+                    product.colors.forEach((color, index) => {
+                        const colorButton = document.createElement('button');
+                        colorButton.className = 'color-btn text-sm px-3 py-1 border rounded-md transition-colors';
+                        colorButton.textContent = color;
+                        colorButton.dataset.color = color;
+
+                        if (index === 0) {
+                            colorButton.classList.add('bg-cyan-500', 'border-cyan-500', 'text-black');
+                            currentSelectedColor = color;
+                        } else {
+                            colorButton.classList.add('border-gray-600', 'text-gray-300', 'hover:bg-gray-700');
+                        }
+                        colorOptionsContainer.appendChild(colorButton);
+                    });
+                } else {
+                    colorOptionsSection.classList.add('hidden');
+                    currentSelectedColor = null;
+                }
+
+                productDetailId.textContent = `Product ID: ${product.id}`;
+                productDetailName.textContent = product.name;
+                detailAddToCartBtn.dataset.productId = product.id;
+                productVideoIframe.src = product.video || '';
+                productVideoIframe.parentElement.classList.toggle('hidden', !product.video);
+
+                productDetailDescription.textContent = product.description;
+                
+                const whatsappMessage = encodeURIComponent(`I'm interested in the product: ${product.name} (ID: ${product.id})`);
+                whatsappLink.href = `https://wa.me/?text=${whatsappMessage}`;
+
+                const similarProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id);
+                renderProducts(similarProducts, similarProductList);
+            }
+
+            function renderCategoryBanners(categories) {
+                categoryBannerList.innerHTML = '';
+                categories.forEach(category => {
+                    const bannerEl = document.createElement('div');
+                    bannerEl.className = 'rounded-lg overflow-hidden shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer';
+                    bannerEl.setAttribute('data-category', category.name);
+                    bannerEl.innerHTML = `<img src="${category.bannerLink}" alt="${category.name}" class="w-full h-auto object-cover">`;
+                    categoryBannerList.appendChild(bannerEl);
+                });
+            }
+
+            function renderOfferBanners(offers) {
+                offerBannerList.innerHTML = '';
+                offers.forEach(offer => {
+                    const bannerEl = document.createElement('div');
+                    bannerEl.className = 'rounded-lg overflow-hidden shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer';
+                    bannerEl.setAttribute('data-offer', offer.key);
+                    bannerEl.innerHTML = `<img src="${offer.bannerLink}" alt="${offer.key}" class="w-full h-auto object-cover">`;
+                    offerBannerList.appendChild(bannerEl);
+                });
+            }
+            
+            function updateActiveNav(activeBtn) {
+                navButtons.forEach(btn => {
+                    btn.classList.remove('text-cyan-400', 'scale-110');
+                    btn.classList.add('text-gray-400');
+                    btn.querySelector('svg').classList.remove('drop-shadow-[0_0_5px_theme(colors.cyan.400/0.8)]');
+                });
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('text-cyan-400', 'scale-110');
+                activeBtn.querySelector('svg').classList.add('drop-shadow-[0_0_5px_theme(colors.cyan.400/0.8)]');
+            }
+            
+            let currentSlide = 0;
+            let slideInterval;
+
+            function renderBanners(bannerImages) {
+                bannerSlider.innerHTML = '';
+                sliderDots.innerHTML = '';
+                if (bannerImages.length === 0) {
+                    bannerSliderContainer.classList.add('hidden');
+                    return;
+                }
+                bannerSliderContainer.classList.remove('hidden');
+
+                bannerImages.forEach((src, index) => {
+                    const slide = document.createElement('div');
+                    slide.className = 'w-full h-full flex-shrink-0';
+                    slide.innerHTML = `<img src="${src}" class="w-full h-full object-cover">`;
+                    bannerSlider.appendChild(slide);
+
+                    const dot = document.createElement('button');
+                    dot.className = 'w-2 h-2 rounded-full bg-gray-600/50 transition-all';
+                    dot.dataset.index = index;
+                    sliderDots.appendChild(dot);
+                });
+
+                showSlide(0);
+                startSlider(bannerImages.length);
+            }
+
+            function showSlide(index) {
+                const dots = sliderDots.querySelectorAll('button');
+                if(bannerSlider) bannerSlider.style.transform = `translateX(-${index * 100}%)`;
+                if(dots.length > 0) {
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('bg-cyan-400', i === index);
+                        dot.classList.toggle('bg-gray-600/50', i !== index);
+                    });
+                }
+                currentSlide = index;
+            }
+
+            function nextSlide(totalSlides) {
+                const nextIndex = (currentSlide + 1) % totalSlides;
+                showSlide(nextIndex);
+            }
+
+            function startSlider(totalSlides) {
+                stopSlider();
+                if (totalSlides > 1) {
+                    slideInterval = setInterval(() => nextSlide(totalSlides), 3000);
+                }
+            }
+            
+            function stopSlider() {
+                clearInterval(slideInterval);
+            }
+            
+            function updateCartCount() {
+                const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+                cartCountElement.textContent = totalItems;
+            }
+
+            function addToCart(productId, selectedSize, selectedColor) {
+                const product = allProducts.find(p => p.id === productId);
+                 if (!product || !selectedSize || !selectedColor) {
+                    const feedback = document.createElement('div');
+                    feedback.textContent = 'Please select size and color.';
+                    feedback.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-md transition-opacity duration-300 opacity-0';
+                    document.body.appendChild(feedback);
+                    requestAnimationFrame(() => feedback.classList.add('opacity-100'));
+                    setTimeout(() => {
+                        feedback.classList.remove('opacity-100');
+                        feedback.addEventListener('transitionend', () => feedback.remove());
+                    }, 2000);
+                    return;
+                }
+
+                const cartItemId = `${productId}-${selectedSize.size}-${selectedColor}`;
+                const existingItem = cartItems.find(item => item.cartId === cartItemId);
+                
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cartItems.push({
+                        ...product,
+                        cartId: cartItemId,
+                        quantity: 1,
+                        selectedSize: selectedSize,
+                        selectedColor: selectedColor
+                    });
+                }
+                updateCartCount();
+                cartIconContainer.classList.add('shake');
+                setTimeout(() => cartIconContainer.classList.remove('shake'), 700);
+            }
+
+            function renderCart() {
+                cartItemList.innerHTML = '';
+                cartSummary.innerHTML = '';
+
+                if (cartItems.length === 0) {
+                    cartItemList.innerHTML = '<p class="text-center text-gray-500">Your cart is empty.</p>';
+                    return;
+                }
+
+                let total = 0;
+                cartItems.forEach(item => {
+                    total += item.selectedSize.price * item.quantity;
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'flex items-center bg-[#161b22] p-3 rounded-lg border border-gray-800';
+                    itemEl.innerHTML = `
+                        <img src="${item.images[0]}" alt="${item.name}" class="w-16 h-16 rounded-md object-cover mr-4">
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-gray-200">${item.name}</h4>
+                             <p class="text-sm text-gray-400">Size: ${item.selectedSize.size}, Color: ${item.selectedColor}</p>
+                            <p class="text-sm text-gray-400">৳${item.selectedSize.price.toLocaleString('bn-BD')}</p>
+                        </div>
+                        <div class="flex items-center">
+                            <button data-id="${item.cartId}" class="cart-quantity-btn decrease-qty bg-gray-800 text-gray-300 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-700">-</button>
+                            <span class="mx-3 font-semibold text-lg">${item.quantity}</span>
+                            <button data-id="${item.cartId}" class="cart-quantity-btn increase-qty bg-gray-800 text-gray-300 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-700">+</button>
+                        </div>
+                         <button data-id="${item.cartId}" class="cart-delete-btn ml-4 text-pink-500 hover:text-pink-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    `;
+                    cartItemList.appendChild(itemEl);
+                });
+                
+                cartTotal = total;
+                cartSummary.innerHTML = `
+                    <div class="bg-[#161b22] p-4 rounded-lg mt-6 border-t border-cyan-500/20">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-lg font-semibold text-gray-300">Total:</span>
+                            <span class="text-xl font-bold text-cyan-400 text-glow-blue">৳${total.toLocaleString('bn-BD')}</span>
+                        </div>
+                        <button id="checkout-btn" class="w-full bg-cyan-500 text-black py-2.5 rounded-lg font-bold hover:bg-cyan-400 hover:shadow-[0_0_20px_theme(colors.cyan.500/0.5)] transition-all">Checkout</button>
+                    </div>
+                `;
+            }
+
+            function handleCartAction(e) {
+                const target = e.target.closest('.cart-quantity-btn, .cart-delete-btn');
+                if (!target) return;
+                
+                const cartId = target.dataset.id;
+                const itemIndex = cartItems.findIndex(item => item.cartId === cartId);
+
+                if (itemIndex === -1) return;
+
+                if (target.classList.contains('increase-qty')) {
+                    cartItems[itemIndex].quantity++;
+                } else if (target.classList.contains('decrease-qty')) {
+                    cartItems[itemIndex].quantity--;
+                    if (cartItems[itemIndex].quantity === 0) {
+                        cartItems.splice(itemIndex, 1);
+                    }
+                } else if (target.classList.contains('cart-delete-btn')) {
+                    cartItems.splice(itemIndex, 1);
+                }
+                
+                updateCartCount();
+                renderCart();
+            }
+
+            function handleSearch() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                searchResultsContainer.innerHTML = '';
+
+                if (searchTerm.length === 0) {
+                    searchResultsContainer.classList.add('hidden');
+                    return;
+                }
+
+                const filteredProducts = allProducts.filter(product =>
+                    product.name.toLowerCase().includes(searchTerm)
+                );
+
+                if (filteredProducts.length > 0) {
+                    searchResultsContainer.classList.remove('hidden');
+                    filteredProducts.forEach(product => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'p-3 hover:bg-gray-700/50 cursor-pointer text-sm border-b border-gray-700/50';
+                        resultItem.textContent = product.name;
+                        resultItem.dataset.productId = product.id;
+                        searchResultsContainer.appendChild(resultItem);
+                    });
+                } else {
+                    searchResultsContainer.classList.add('hidden');
+                }
+            }
+            
+            function updateOrderSummary() {
+                const deliveryType = document.querySelector('input[name="deliveryType"]:checked');
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+                const summaryContainer = document.getElementById('order-summary');
+                const bkashDetails = document.getElementById('bkash-payment-details');
+                const transactionIdInput = document.getElementById('transactionId');
+                const senderNumberInput = document.getElementById('senderNumber');
+
+                if (!deliveryType || !paymentMethod) {
+                    summaryContainer.innerHTML = '<p class="text-center text-gray-500">Please select delivery and payment options.</p>';
+                    bkashDetails.classList.add('hidden');
+                    return;
+                }
+
+                const deliveryCost = deliveryCharges[deliveryType.value];
+                let amountToPay = 0;
+                let paymentInstructions = '';
+
+                bkashDetails.classList.remove('hidden');
+                transactionIdInput.required = true;
+                senderNumberInput.required = true;
+
+                if (paymentMethod.value === 'cod') {
+                    amountToPay = deliveryCost;
+                    paymentInstructions = `Please pay only the delivery charge (৳${deliveryCost.toLocaleString('bn-BD')}) via bKash to confirm your order. The product price (৳${cartTotal.toLocaleString('bn-BD')}) will be collected upon delivery.`;
+                } else if (paymentMethod.value === 'bkash') {
+                    amountToPay = cartTotal + deliveryCost;
+                    paymentInstructions = 'Please pay the full amount via bKash now.';
+                }
+
+                summaryContainer.innerHTML = `
+                    <div class="flex justify-between text-sm text-gray-400">
+                        <span>Subtotal</span>
+                        <span>৳${cartTotal.toLocaleString('bn-BD')}</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-400">
+                        <span>Delivery Charge</span>
+                        <span>৳${deliveryCost.toLocaleString('bn-BD')}</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-white border-t border-gray-700 pt-2 mt-2">
+                        <span>Total to Pay Now</span>
+                        <span class="text-cyan-400">৳${amountToPay.toLocaleString('bn-BD')}</span>
+                    </div>
+                    <p class="text-xs text-center text-gray-500 pt-2">${paymentInstructions}</p>
+                `;
+            }
+
+            function renderCheckoutPage() {
+                // Reset form fields
+                checkoutForm.reset();
+                updateOrderSummary(); // Initial summary rendering
+                
+                // Add listeners to radio buttons to update summary on change
+                document.querySelectorAll('input[name="deliveryType"], input[name="paymentMethod"]').forEach(radio => {
+                    radio.addEventListener('change', updateOrderSummary);
+                });
+            }
+
+
+            // --- Event Listeners ---
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.target.closest('a').id;
+                    updateActiveNav(e.target.closest('a'));
+                    
+                    switch(targetId) {
+                        case 'home-btn': navigate('product'); break;
+                        case 'category-btn-nav': navigate('category-display'); break;
+                        case 'offer-btn-nav': navigate('offer'); break;
+                        case 'about-us-btn': navigate('about-us'); break;
+                    }
+                });
+            });
+
+            backBtn.addEventListener('click', () => history.back());
+            
+            window.addEventListener('popstate', (event) => {
+                const state = event.state || { page: 'product', data: null };
+                renderPage(state.page, state.data);
+            });
+
+
+            cartIconContainer.addEventListener('click', () => { renderCart(); navigate('cart'); });
+            document.getElementById('header-title').addEventListener('click', () => { if (location.hash !== '#product') { navigate('product'); } });
+
+            document.getElementById('search-icon-btn').addEventListener('click', () => {
+                searchBarContainer.classList.toggle('active');
+                if (searchBarContainer.classList.contains('active')) {
+                    searchInput.focus();
+                } else {
+                    searchResultsContainer.classList.add('hidden');
+                    searchInput.value = '';
+                }
+            });
+
+            searchInput.addEventListener('input', handleSearch);
+
+            searchResultsContainer.addEventListener('click', (e) => {
+                if (e.target.dataset.productId) {
+                    const productId = e.target.dataset.productId;
+                    navigate('product-detail', productId);
+                }
+            });
+            
+            document.addEventListener('click', function(event) {
+                const isClickInsideSearch = searchBarContainer.contains(event.target) || document.getElementById('search-icon-btn').contains(event.target);
+                if (!isClickInsideSearch) {
+                    searchResultsContainer.classList.add('hidden');
+                }
+            });
+
+            categoryBannerList.addEventListener('click', (e) => {
+                const banner = e.target.closest('[data-category]');
+                if(banner) {
+                    const category = banner.dataset.category;
+                    navigate('product', { type: 'category', value: category });
+                }
+            });
+
+            offerBannerList.addEventListener('click', (e) => {
+                const banner = e.target.closest('[data-offer]');
+                if(banner) {
+                    const offerKey = banner.dataset.offer;
+                    navigate('product', { type: 'offer', value: offerKey });
+                }
+            });
+
+            mainContent.addEventListener('click', function(e) {
+                const productCard = e.target.closest('[data-product-id]');
+                if (productCard && (productCard.parentElement.id === 'product-list' || productCard.parentElement.id === 'similar-product-list')) {
+                    const productId = productCard.dataset.productId;
+                    navigate('product-detail', productId);
+                }
+                
+                if(e.target.id === 'detail-add-to-cart-btn') {
+                    const productId = e.target.dataset.productId;
+                    addToCart(productId, currentSelectedSize, currentSelectedColor);
+                }
+
+                if(e.target.id === 'checkout-btn') {
+                    navigate('checkout');
+                }
+                
+                 if(e.target.id === 'back-to-home-btn') {
+                    navigate('product');
+                }
+
+
+                if (e.target.classList.contains('size-btn')) {
+                    const selectedBtn = e.target;
+                    productDetailPrice.textContent = `৳${parseInt(selectedBtn.dataset.price).toLocaleString('bn-BD')}`;
+                    currentSelectedSize = { size: selectedBtn.dataset.size, price: parseInt(selectedBtn.dataset.price) };
+                    
+                    document.querySelectorAll('.size-btn').forEach(btn => {
+                        btn.classList.remove('bg-cyan-500', 'border-cyan-500', 'text-black');
+                        btn.classList.add('border-gray-600', 'text-gray-300', 'hover:bg-gray-700');
+                    });
+                    selectedBtn.classList.add('bg-cyan-500', 'border-cyan-500', 'text-black');
+                    selectedBtn.classList.remove('border-gray-600', 'text-gray-300', 'hover:bg-gray-700');
+                }
+
+                if (e.target.classList.contains('color-btn')) {
+                    const selectedBtn = e.target;
+                    currentSelectedColor = selectedBtn.dataset.color;
+                    
+                    document.querySelectorAll('.color-btn').forEach(btn => {
+                        btn.classList.remove('bg-cyan-500', 'border-cyan-500', 'text-black');
+                        btn.classList.add('border-gray-600', 'text-gray-300', 'hover:bg-gray-700');
+                    });
+                    selectedBtn.classList.add('bg-cyan-500', 'border-cyan-500', 'text-black');
+                    selectedBtn.classList.remove('border-gray-600', 'text-gray-300', 'hover:bg-gray-700');
+                }
+            });
+            
+            checkoutForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const orderData = Object.fromEntries(formData.entries());
+                orderData.items = cartItems;
+                orderData.total = cartTotal;
+                orderData.createdAt = serverTimestamp();
+
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/orders`), orderData);
+                    cartItems = [];
+                    updateCartCount();
+                    navigate('order-success');
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                    alert("Could not place order. Please try again.");
+                }
+            });
+
+            cartItemList.addEventListener('click', handleCartAction);
+            
+            sliderDots.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const index = parseInt(e.target.dataset.index);
+                    showSlide(index);
+                    startSlider();
+                }
+            });
+            
+            bannerSliderContainer.addEventListener('mouseenter', stopSlider);
+            bannerSliderContainer.addEventListener('mouseleave', startSlider);
+
+            // --- Initial Load ---
+            onSnapshot(bannersRef, (snapshot) => {
+                const bannerUrls = snapshot.docs.map(doc => doc.data().url);
+                renderBanners(bannerUrls);
+            });
+
+            onSnapshot(productsRef, (snapshot) => {
+                allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const hash = window.location.hash || '#product';
+                const [page, dataStr] = hash.slice(1).split('/');
+                 if (page === 'product' && !dataStr) {
+                    renderProducts(allProducts, productList);
+                 }
+            });
+
+            onSnapshot(categoriesRef, (snapshot) => {
+                allCategories = snapshot.docs.map(doc => doc.data());
+                renderCategoryBanners(allCategories);
+            });
+
+            onSnapshot(offersRef, (snapshot) => {
+                allOffers = snapshot.docs.map(doc => doc.data());
+                renderOfferBanners(allOffers);
+            });
+            
+            onSnapshot(settingsRef, (doc) => {
+                if (doc.exists()) {
+                    const settings = doc.data();
+                    deliveryCharges.inside = settings.deliveryInside || 60;
+                    deliveryCharges.outside = settings.deliveryOutside || 120;
+                    document.getElementById('bkash-number-display').innerHTML = `Please send money to this bKash number: <strong class="text-pink-400">${settings.bKashNumber || 'Not available'}</strong>`;
+                    
+                    const deliveryOptionsContainer = document.getElementById('delivery-options-container');
+                    deliveryOptionsContainer.innerHTML = `
+                        <div class="flex items-center">
+                            <input id="deliveryInside" name="deliveryType" type="radio" value="inside" required class="focus:ring-cyan-500 h-4 w-4 text-cyan-600 border-gray-600">
+                            <label for="deliveryInside" class="ml-3 block text-sm font-medium text-gray-300">Inside Chattogram (৳${deliveryCharges.inside})</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="deliveryOutside" name="deliveryType" type="radio" value="outside" required class="focus:ring-cyan-500 h-4 w-4 text-cyan-600 border-gray-600">
+                            <label for="deliveryOutside" class="ml-3 block text-sm font-medium text-gray-300">Outside Chattogram (৳${deliveryCharges.outside})</label>
+                        </div>
+                    `;
+                }
+            });
+
+            onSnapshot(aboutUsRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    aboutUsContent.innerHTML = `
+                         <div class="space-y-3">
+                            <p>${data.introPara1 || ''}</p>
+                            <p>${data.introPara2 || ''}</p>
+                        </div>
+                         <div>
+                            <h4 class="text-md font-semibold text-gray-300 mb-2 border-b border-gray-700 pb-1">Address</h4>
+                            <div class="space-y-3 text-xs leading-relaxed">
+                               ${(data.address || '').replace(/\n/g, '<p>')}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Follow Us</h4>
+                            <div class="flex items-center justify-center space-x-6 text-gray-400">
+                                <a href="${data.socials.whatsapp}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583108/whatsapp-icon-seeklogo_bhlfrp.png" alt="WhatsApp" class="h-6 w-6"></a>
+                                <a href="${data.socials.facebook}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583108/facebook-new-2019-seeklogo_acakdy.png" alt="Facebook" class="h-6 w-6"></a>
+                                <a href="${data.socials.instagram}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583110/instagram-new-2022-seeklogo_jcdaus.png" alt="Instagram" class="h-6 w-6"></a>
+                                <a href="${data.socials.tiktok}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583109/tiktok-app-icon-seeklogo_smyrbn.png" alt="TikTok" class="h-6 w-6"></a>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-300 mb-2 border-b border-gray-700 pb-1">Returns Policy</h4>
+                            <p class="text-xs leading-relaxed">${data.returnsPolicy || ''}</p>
+                        </div>
+                        <div class="text-center text-xs text-gray-600 pt-4 border-t border-gray-800">
+                            <p>&copy; 2024 Edge of Art. All Rights Reserved.</p>
+                        </div>
+                    `;
+                }
+            });
+
+            const hash = window.location.hash || '#product';
+            const [page, dataStr] = hash.slice(1).split('/');
+            let initialData = null;
+            if (page === 'product-detail') initialData = dataStr;
+            else if (page === 'product' && dataStr) {
+                // This part is tricky, we don't know if it's a category or offer from URL alone
+                // For simplicity, we'll just load the main product page on initial load if there's a filter in URL
+            }
+            history.replaceState({ page: 'product', data: null }, '', '#product');
+            renderPage('product');
+            updateActiveNav(document.getElementById('home-btn'));
+
+        }
+
+    </script>
+</body>
+</html>
+
