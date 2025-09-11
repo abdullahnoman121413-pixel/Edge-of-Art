@@ -901,6 +901,20 @@
             window.addEventListener('popstate', (event) => {
                 const state = event.state || { page: 'product', data: null };
                 renderPage(state.page, state.data);
+
+                // Update active nav item based on the page state
+                let activeBtn = null;
+                if (state.page === 'product' && !state.data) {
+                    activeBtn = document.getElementById('home-btn');
+                } else if (state.page === 'category-display') {
+                    activeBtn = document.getElementById('category-btn-nav');
+                } else if (state.page === 'about-us') {
+                    activeBtn = document.getElementById('about-us-btn');
+                }
+                
+                if (activeBtn) {
+                    updateActiveNav(activeBtn);
+                }
             });
 
 
@@ -1091,10 +1105,10 @@
                         <div>
                             <h4 class="text-md font-semibold text-gray-300 mb-3 border-b border-gray-700 pb-1">Follow Us</h4>
                             <div class="flex items-center justify-center space-x-6 text-gray-400">
-                                <a href="${data.socials.whatsapp}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583108/whatsapp-icon-seeklogo_bhlfrp.png" alt="WhatsApp" class="h-6 w-6"></a>
-                                <a href="${data.socials.facebook}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583108/facebook-new-2019-seeklogo_acakdy.png" alt="Facebook" class="h-6 w-6"></a>
-                                <a href="${data.socials.instagram}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583110/instagram-new-2022-seeklogo_jcdaus.png" alt="Instagram" class="h-6 w-6"></a>
-                                <a href="${data.socials.tiktok}" target="_blank" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583109/tiktok-app-icon-seeklogo_smyrbn.png" alt="TikTok" class="h-6 w-6"></a>
+                                <a href="${data.socials.whatsapp}" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583108/whatsapp-icon-seeklogo_bhlfrp.png" alt="WhatsApp" class="h-6 w-6"></a>
+                                <a href="${data.socials.facebook}" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583108/facebook-new-2019-seeklogo_acakdy.png" alt="Facebook" class="h-6 w-6"></a>
+                                <a href="${data.socials.instagram}" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583110/instagram-new-2022-seeklogo_jcdaus.png" alt="Instagram" class="h-6 w-6"></a>
+                                <a href="${data.socials.tiktok}" class="hover:opacity-80 transition-opacity"><img src="https://res.cloudinary.com/dgv24s9zl/image/upload/v1757583109/tiktok-app-icon-seeklogo_smyrbn.png" alt="TikTok" class="h-6 w-6"></a>
                             </div>
                         </div>
                         <div>
@@ -1125,4 +1139,6 @@
     </script>
 </body>
 </html>
+
+
 
