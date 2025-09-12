@@ -84,6 +84,7 @@
             opacity: 1;
             transform: translateY(0);
             margin-bottom: 1rem !important;
+            overflow: visible; /* This line fixes the issue */
         }
     </style>
 </head>
@@ -121,7 +122,7 @@
         <main class="p-4">
             
             <!-- Search Bar -->
-            <div id="search-bar-container" class="relative">
+            <div id="search-bar-container" class="relative z-40">
                 <input type="text" id="search-input" placeholder="Search here..." class="w-full py-2 pl-10 pr-4 bg-transparent border border-gray-700 rounded-full focus:outline-none text-white placeholder-gray-500">
                 <div class="absolute top-0 left-0 inline-flex items-center justify-center h-full w-10 text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,7 +130,7 @@
                     </svg>
                 </div>
                 <!-- Search Results Dropdown -->
-                <div id="search-results-container" class="absolute top-full left-0 right-0 bg-[#1e242c] border border-gray-700 rounded-b-lg mt-1 z-10 hidden max-h-60 overflow-y-auto">
+                <div id="search-results-container" class="absolute top-full left-0 right-0 bg-[#1e242c] border border-gray-700 rounded-b-lg mt-1 z-30 hidden max-h-60 overflow-y-auto">
                     <!-- Search results will be injected here -->
                 </div>
             </div>
@@ -219,7 +220,7 @@
                     
                     <div class="flex justify-between items-center mb-4">
                         <p id="product-detail-price" class="text-3xl font-bold text-cyan-400 text-glow-blue"></p>
-                        <a href="#" id="whatsapp-link" target="_blank" class="bg-green-500 text-white px-3 py-2 text-sm font-bold rounded-md hover:bg-green-600 transition-colors">
+                        <a href="#" id="whatsapp-link" class="bg-green-500 text-white px-3 py-2 text-sm font-bold rounded-md hover:bg-green-600 transition-colors">
                             Order on WhatsApp
                         </a>
                     </div>
@@ -437,6 +438,7 @@
             let currentSelectedColor = null;
             let cartTotal = 0;
             let deliveryCharges = { inside: 60, outside: 120 };
+            let siteSettings = { socials: {} };
             
             // --- Firestore References ---
             const productsRef = collection(db, `artifacts/${appId}/public/data/products`);
@@ -447,6 +449,20 @@
             const bannersRef = collection(db, `artifacts/${appId}/public/data/banners`);
 
             // --- Functions ---
+            const convertYoutubeUrlToEmbed = (url) => {
+                if (!url) return '';
+                let videoId = '';
+                // Regular expression to find the video ID from various YouTube URL formats
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url.match(regExp);
+                if (match && match[2].length === 11) {
+                    videoId = match[2];
+                } else {
+                    return ''; // Return empty if no valid ID found
+                }
+                return `https://www.youtube.com/embed/${videoId}`;
+            };
+
             const navigate = (pageName, data = null, push = true) => {
                 if (push) {
                     const state = { page: pageName, data: data };
@@ -586,13 +602,23 @@
                 productDetailId.textContent = `Product ID: ${product.id}`;
                 productDetailName.textContent = product.name;
                 detailAddToCartBtn.dataset.productId = product.id;
-                productVideoIframe.src = product.video || '';
-                productVideoIframe.parentElement.classList.toggle('hidden', !product.video);
+
+                const embedUrl = convertYoutubeUrlToEmbed(product.video);
+                const videoContainer = document.getElementById('product-video-container');
+                if (embedUrl) {
+                    productVideoIframe.src = embedUrl;
+                    videoContainer.classList.remove('hidden');
+                } else {
+                    videoContainer.classList.add('hidden');
+                }
 
                 productDetailDescription.textContent = product.description;
                 
-                const whatsappMessage = encodeURIComponent(`I'm interested in the product: ${product.name} (ID: ${product.id})`);
-                whatsappLink.href = `https://wa.me/?text=${whatsappMessage}`;
+                const whatsappBaseUrl = siteSettings.socials.whatsapp || 'https://wa.me/';
+                const message = encodeURIComponent(`I'm interested in the product: *${product.name}* (ID: ${product.id})`);
+                const separator = whatsappBaseUrl.includes('?') ? '&' : '?';
+                const finalUrl = `${whatsappBaseUrl}${separator}text=${message}`;
+                whatsappLink.href = finalUrl;
 
                 const similarProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id);
                 renderProducts(similarProducts, similarProductList);
@@ -626,9 +652,11 @@
                     btn.classList.add('text-gray-400');
                     btn.querySelector('svg').classList.remove('drop-shadow-[0_0_5px_theme(colors.cyan.400/0.8)]');
                 });
-                activeBtn.classList.remove('text-gray-400');
-                activeBtn.classList.add('text-cyan-400', 'scale-110');
-                activeBtn.querySelector('svg').classList.add('drop-shadow-[0_0_5px_theme(colors.cyan.400/0.8)]');
+                if (activeBtn) {
+                    activeBtn.classList.remove('text-gray-400');
+                    activeBtn.classList.add('text-cyan-400', 'scale-110');
+                    activeBtn.querySelector('svg').classList.add('drop-shadow-[0_0_5px_theme(colors.cyan.400/0.8)]');
+                }
             }
             
             let currentSlide = 0;
@@ -807,9 +835,10 @@
                 const filteredProducts = allProducts.filter(product =>
                     product.name.toLowerCase().includes(searchTerm)
                 );
+                
+                searchResultsContainer.classList.remove('hidden');
 
                 if (filteredProducts.length > 0) {
-                    searchResultsContainer.classList.remove('hidden');
                     filteredProducts.forEach(product => {
                         const resultItem = document.createElement('div');
                         resultItem.className = 'p-3 hover:bg-gray-700/50 cursor-pointer text-sm border-b border-gray-700/50';
@@ -818,7 +847,10 @@
                         searchResultsContainer.appendChild(resultItem);
                     });
                 } else {
-                    searchResultsContainer.classList.add('hidden');
+                    const noResultItem = document.createElement('div');
+                    noResultItem.className = 'p-3 text-sm text-gray-500 text-center';
+                    noResultItem.textContent = 'No products found.';
+                    searchResultsContainer.appendChild(noResultItem);
                 }
             }
             
@@ -902,19 +934,19 @@
                 const state = event.state || { page: 'product', data: null };
                 renderPage(state.page, state.data);
 
-                // Update active nav item based on the page state
+                // Update active nav item based on the URL hash for better accuracy
+                const hash = window.location.hash || '#product';
                 let activeBtn = null;
-                if (state.page === 'product' && !state.data) {
+                
+                if (hash === '#product') {
                     activeBtn = document.getElementById('home-btn');
-                } else if (state.page === 'category-display') {
+                } else if (hash === '#category-display') {
                     activeBtn = document.getElementById('category-btn-nav');
-                } else if (state.page === 'about-us') {
+                } else if (hash === '#about-us') {
                     activeBtn = document.getElementById('about-us-btn');
                 }
                 
-                if (activeBtn) {
-                    updateActiveNav(activeBtn);
-                }
+                updateActiveNav(activeBtn);
             });
 
 
@@ -937,6 +969,9 @@
                 if (e.target.dataset.productId) {
                     const productId = e.target.dataset.productId;
                     navigate('product-detail', productId);
+                    // Clear search and hide results after selection
+                    searchInput.value = '';
+                    searchResultsContainer.classList.add('hidden');
                 }
             });
             
@@ -1091,6 +1126,7 @@
             onSnapshot(aboutUsRef, (doc) => {
                 if (doc.exists()) {
                     const data = doc.data();
+                    siteSettings.socials = data.socials || {};
                     aboutUsContent.innerHTML = `
                          <div class="space-y-3">
                             <p>${data.introPara1 || ''}</p>
@@ -1139,6 +1175,14 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 
