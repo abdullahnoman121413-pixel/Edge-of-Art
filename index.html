@@ -191,7 +191,7 @@
             <section id="product-detail-section" class="hidden">
                 <!-- Image Gallery -->
                 <div id="product-image-gallery" class="mb-4">
-                    <img id="main-product-image" src="" alt="Product Image" class="w-full h-64 object-cover rounded-lg mb-2 border border-gray-700">
+                    <img id="main-product-image" src="" alt="Product Image" class="w-full aspect-square object-cover rounded-lg mb-2 border border-gray-700">
                     <div id="thumbnail-container" class="flex space-x-2 overflow-x-auto pb-2">
                         <!-- Thumbnails go here -->
                     </div>
@@ -525,7 +525,7 @@
                     productCard.className = 'bg-[#161b22] border border-gray-800 rounded-xl overflow-hidden group transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_0_20px_theme(colors.cyan.500/0.2)] cursor-pointer';
                     productCard.dataset.productId = product.id;
                     productCard.innerHTML = `
-                        <img src="${product.images && product.images.length > 0 ? product.images[0] : 'https://placehold.co/400x400/161b22/38bdf8?text=No+Image'}" alt="${product.name}" class="w-full h-40 object-cover">
+                        <img src="${product.images && product.images.length > 0 ? product.images[0] : 'https://placehold.co/800x800/161b22/38bdf8?text=No+Image'}" alt="${product.name}" class="w-full aspect-square object-cover">
                         <div class="p-3">
                             <h4 class="font-semibold text-sm text-gray-200 truncate group-hover:text-cyan-400 transition-colors">${product.name}</h4>
                         </div>`;
@@ -1175,6 +1175,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
