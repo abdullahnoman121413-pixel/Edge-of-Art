@@ -612,7 +612,7 @@
                     videoContainer.classList.add('hidden');
                 }
 
-                productDetailDescription.textContent = product.description;
+                productDetailDescription.innerHTML = (product.description || '').replace(/\n/g, '<br>');
                 
                 const whatsappBaseUrl = siteSettings.socials.whatsapp || 'https://wa.me/';
                 const message = encodeURIComponent(`I'm interested in the product: *${product.name}* (ID: ${product.id})`);
@@ -1175,6 +1175,7 @@
     </script>
 </body>
 </html>
+
 
 
 
